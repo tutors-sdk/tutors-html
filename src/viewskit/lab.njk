@@ -1,0 +1,25 @@
+{% from "lab-component/nav-bar.njk" import navBar %}
+{% from "lab-component/nav-body.njk" import navBody %}
+
+
+<h1> {{ lo.parent.lotype }} </h1>
+
+{% if lo.parent.lotype == 'unit' %}
+  {% set assetprefix = "../../../assets" %}
+{% else %}
+  {% set assetprefix = "../../assets" %}
+
+{% endif %}
+
+{% extends "mainlab.html" %}
+
+{% block content %}
+  {{ navBar(lo) }}
+  {{ navBody(lo) }}
+  <br>
+  <script>
+    {% include "js/lab.js" %}
+    {% include "js/main.js" %}
+  </script>
+
+{% endblock %}
