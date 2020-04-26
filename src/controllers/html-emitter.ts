@@ -3,7 +3,10 @@ import * as sh from 'shelljs';
 import { Course } from '@tutors-sdk/tutors-lib/src/models/course';
 import { writeFile } from '@tutors-sdk/tutors-lib/src/utils/futils';
 import { getCurrentDirectory } from '../../../tutors-lib/src/utils/futils';
-import { Topic } from '../../../tutors-lib/src/models/topic';
+import { Topic, Unit } from '../../../tutors-lib/src/models/topic';
+import { Lab } from '@tutors-sdk/tutors-lib/src/models/lab';
+import { MarkdownParser } from './markdown-parser';
+import { LearningObject } from '@tutors-sdk/tutors-lib/src/models/lo';
 
 const nunjucks = require('nunjucks');
 
@@ -12,11 +15,42 @@ export function publishTemplate(path: string, file: string, template: string, lo
 }
 
 export class HtmlEmitter {
+  parser = new MarkdownParser();
+
+  emitLab(lab: Lab, path: string) {
+    lab.chapters.forEach((chapter) => {
+      chapter.content = this.parser.parse(chapter.contentMd);
+    });
+    const labPath = path + '/' + lab.folder;
+    publishTemplate(labPath, 'index.html', 'lab.njk', lab);
+  }
+
+  emitUnit(unit: Unit, path: string) {
+    unit.los.forEach((lo) => {
+      if (lo.lotype == 'lab') {
+        this.emitLab(lo as Lab, path);
+      }
+    });
+  }
+
+  emitLo(lo: LearningObject, path: string) {
+    if (lo.lotype == 'unit') {
+      const unitPath = path + '/' + lo.folder;
+      this.emitUnit(lo as Unit, unitPath);
+    } else {
+      if (lo.lotype == 'lab') {
+        this.emitLab(lo as Lab, path);
+      }
+    }
+  }
+
   emitTopic(topic: Topic, path: string) {
     sh.cd(topic.folder);
     const topicPath = path + '/' + topic.folder;
     publishTemplate(topicPath, 'index.html', 'topic.njk', topic);
-    topic.los.forEach((lo) => {});
+    topic.los.forEach((lo) => {
+      this.emitLo(lo, topicPath);
+    });
     sh.cd('..');
   }
 

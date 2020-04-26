@@ -2,5 +2,7 @@ node_modules/
 .idea
 *.js
 *.map
+!src/assets/**
 npm-debug.log
 .vscode
+*.DS_Store
