@@ -17,6 +17,10 @@ export function publishTemplate(path: string, file: string, template: string, lo
 export class HtmlEmitter {
   parser = new MarkdownParser();
 
+  emitObjectves(lo: LearningObject) {
+    if (lo.objectivesMd) lo.objectives = this.parser.parse(lo.objectivesMd);
+  }
+
   emitLab(lab: Lab, path: string) {
     lab.chapters.forEach((chapter) => {
       chapter.content = this.parser.parse(chapter.contentMd);
@@ -27,6 +31,7 @@ export class HtmlEmitter {
 
   emitUnit(unit: Unit, path: string) {
     unit.los.forEach((lo) => {
+      this.emitObjectves(lo);
       if (lo.lotype == 'lab') {
         this.emitLab(lo as Lab, path);
       }
@@ -41,23 +46,30 @@ export class HtmlEmitter {
       if (lo.lotype == 'lab') {
         this.emitLab(lo as Lab, path);
       }
+      this.emitObjectves(lo);
     }
   }
 
   emitTopic(topic: Topic, path: string) {
     sh.cd(topic.folder);
+    this.emitObjectves(topic);
     const topicPath = path + '/' + topic.folder;
-    publishTemplate(topicPath, 'index.html', 'topic.njk', topic);
     topic.los.forEach((lo) => {
       this.emitLo(lo, topicPath);
     });
+    publishTemplate(topicPath, 'index.html', 'topic.njk', topic);
     sh.cd('..');
   }
 
   emitCourse(course: Course, path: string) {
-    publishTemplate(path, 'index.html', 'course.njk', course);
     course.los.forEach((lo) => {
       this.emitTopic(lo as Topic, path);
+    });
+    publishTemplate(path, 'index.html', 'course.njk', course);
+    course.walls.forEach((loWall) => {
+      if (loWall.los.length > 0) {
+        publishTemplate(path, '/' + loWall.los[0].lotype + 'wall.html', 'wall.njk', loWall);
+      }
     });
   }
 
