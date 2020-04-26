@@ -13,7 +13,7 @@
     "url": "https://github.com/tutors-sdk/tutors-html.git"
   },
   "bin": {
-    "tutors-html": "./tutors-json.html"
+    "tutors-html": "./tutors-html.js"
   },
   "dependencies": {
     "@tutors-sdk/tutors-lib": "^0.2.0",
