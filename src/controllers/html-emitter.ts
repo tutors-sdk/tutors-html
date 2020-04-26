@@ -2,8 +2,8 @@ import * as sh from 'shelljs';
 
 import { Course } from '@tutors-sdk/tutors-lib/src/models/course';
 import { writeFile } from '@tutors-sdk/tutors-lib/src/utils/futils';
-import { getCurrentDirectory } from '../../../tutors-lib/src/utils/futils';
-import { Topic, Unit } from '../../../tutors-lib/src/models/topic';
+import { getCurrentDirectory } from '@tutors-sdk/tutors-lib/src/utils/futils';
+import { Topic, Unit } from '@tutors-sdk/tutors-lib/src/models/topic';
 import { Lab } from '@tutors-sdk/tutors-lib/src/models/lab';
 import { MarkdownParser } from './markdown-parser';
 import { LearningObject } from '@tutors-sdk/tutors-lib/src/models/lo';
