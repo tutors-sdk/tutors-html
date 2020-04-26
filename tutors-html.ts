@@ -2,8 +2,7 @@
 import * as fs from 'fs';
 import { Course } from '@tutors-sdk/tutors-lib/src/models/course';
 import { HtmlEmitter } from './src/controllers/html-emitter';
-import { copyFolder } from '../tutors-lib/src/utils/futils';
-import * as path from 'path';
+import { copyFolder } from '@tutors-sdk/tutors-lib/src/utils/futils';
 const version = require('./package.json').version;
 
 const nunjucks = require('nunjucks');
