@@ -1,113 +1,82 @@
+import * as sh from 'shelljs';
+
 import { Course } from '@tutors-sdk/tutors-lib/src/models/course';
-import { LearningObject } from '@tutors-sdk/tutors-lib/src/models/lo';
-import { Topic, Unit } from '@tutors-sdk/tutors-lib/src/models/topic';
-import { Archive, PanelTalk, Talk } from '@tutors-sdk/tutors-lib/src/models/los';
-import { PanelVideo } from '@tutors-sdk/tutors-lib/src/models/web-los';
 import { writeFile } from '@tutors-sdk/tutors-lib/src/utils/futils';
+import { getCurrentDirectory } from '../../../tutors-lib/src/utils/futils';
+import { Topic, Unit } from '../../../tutors-lib/src/models/topic';
 import { Lab } from '@tutors-sdk/tutors-lib/src/models/lab';
+import { MarkdownParser } from './markdown-parser';
+import { LearningObject } from '@tutors-sdk/tutors-lib/src/models/lo';
+
+const nunjucks = require('nunjucks');
+
+export function publishTemplate(path: string, file: string, template: string, lo: any): void {
+  writeFile(path, file, nunjucks.render(template, { lo: lo }));
+}
 
 export class HtmlEmitter {
-  version = '0.0';
+  parser = new MarkdownParser();
 
-  emitLo(lo: LearningObject, url: string, jsonObj: any) {
-    jsonObj.properties = lo.properties;
-    jsonObj.title = lo.title;
-    jsonObj.type = lo.lotype;
-    jsonObj.summary = lo.objectivesMd;
-    jsonObj.img = `https://${url}/${lo.img}`;
-    if (lo.videoid) {
-      jsonObj.video = `#video/${url}/${lo.videoid}`;
-    }
-    jsonObj.id = lo.folder;
-    jsonObj.route = lo.link;
-    jsonObj.hide = lo.hide;
+  emitObjectves(lo: LearningObject) {
+    if (lo.objectivesMd) lo.objectives = this.parser.parse(lo.objectivesMd);
   }
 
-  emitTalk(lo: Talk, url: string, jsonObj: any) {
-    jsonObj.pdf = `https://${url}/${lo.link}`;
-    jsonObj.route = `#talk/${url}/${lo.link}`;
-  }
-
-  emitLab(lo: Lab, url: string, jsonObj: any) {
-    jsonObj.route = `#lab/${url}`;
-    jsonObj.los = [];
-    lo.chapters.forEach((chapter) => {
-      let jsonChapter: any = {};
-      jsonChapter.title = chapter.title;
-      jsonChapter.shortTitle = chapter.shortTitle;
-      jsonChapter.contentMd = chapter.contentMd;
-      jsonChapter.route = `${jsonObj.route}/${chapter.shortTitle}`;
-      jsonObj.los.push(jsonChapter);
+  emitLab(lab: Lab, path: string) {
+    lab.chapters.forEach((chapter) => {
+      chapter.content = this.parser.parse(chapter.contentMd);
     });
+    const labPath = path + '/' + lab.folder;
+    publishTemplate(labPath, 'index.html', 'lab.njk', lab);
   }
 
-  emitPanelTalk(lo: PanelTalk, url: string, jsonObj: any) {
-    jsonObj.pdf = `https://${url}/${lo.link}`;
-    jsonObj.route = `#talk/${url}/${lo.link}`;
-  }
-
-  emitArchive(lo: Archive, url: string, jsonObj: any) {
-    jsonObj.route = `https://${url}/${lo.link}`;
-  }
-
-  emitPanelVideo(lo: PanelVideo, url: string, jsonObj: any) {
-    jsonObj.route = `#video/${url}/${lo.link}`;
-  }
-
-  emitUnit(lo: Unit, url: string, jsonObj: any) {
-    url = url.substring(0, url.lastIndexOf('/')) + '/';
-    this.emitTopic(lo, url, jsonObj);
-    jsonObj.route = `#topic/${url}`;
-  }
-
-  emitTopic(lo: Topic, url: string, jsonObj: any) {
-    const topicUrl = `${url}${lo.folder}`;
-    this.emitLo(lo, topicUrl, jsonObj);
-    jsonObj.route = `#topic/${topicUrl}`;
-    jsonObj.los = [];
-    lo.los.forEach((lo) => {
-      let loJson: any = {};
-      const baseUrl = `${topicUrl}/${lo.folder}`;
-      this.emitLo(lo, baseUrl, loJson);
-      switch (lo.lotype) {
-        case 'unit':
-          this.emitUnit(lo as Unit, baseUrl, loJson);
-          break;
-        case 'talk':
-          this.emitTalk(lo as Talk, baseUrl, loJson);
-          break;
-        case 'lab':
-          this.emitLab(lo as Lab, baseUrl, loJson);
-          break;
-        case 'paneltalk':
-          this.emitPanelTalk(lo as PanelTalk, baseUrl, loJson);
-          break;
-        case 'archive':
-          this.emitArchive(lo as Archive, baseUrl, loJson);
-          break;
-        case 'panelvideo':
-          this.emitPanelVideo(lo as PanelVideo, baseUrl, loJson);
-          break;
+  emitUnit(unit: Unit, path: string) {
+    unit.los.forEach((lo) => {
+      this.emitObjectves(lo);
+      if (lo.lotype == 'lab') {
+        this.emitLab(lo as Lab, path);
       }
-      jsonObj.los.push(loJson);
     });
   }
 
-  emitCourse(lo: Course, url: string, jsonObj: any) {
-    this.emitLo(lo, url, jsonObj);
-    jsonObj.los = [];
-    lo.los.forEach((lo) => {
-      let topicObj: any = {};
-      this.emitTopic(lo as Topic, url, topicObj);
-      jsonObj.los.push(topicObj);
+  emitLo(lo: LearningObject, path: string) {
+    if (lo.lotype == 'unit') {
+      const unitPath = path + '/' + lo.folder;
+      this.emitUnit(lo as Unit, unitPath);
+    } else {
+      if (lo.lotype == 'lab') {
+        this.emitLab(lo as Lab, path);
+      }
+      this.emitObjectves(lo);
+    }
+  }
+
+  emitTopic(topic: Topic, path: string) {
+    sh.cd(topic.folder);
+    this.emitObjectves(topic);
+    const topicPath = path + '/' + topic.folder;
+    topic.los.forEach((lo) => {
+      this.emitLo(lo, topicPath);
     });
-    jsonObj.enrollment = lo.enrollment;
+    publishTemplate(topicPath, 'index.html', 'topic.njk', topic);
+    sh.cd('..');
+  }
+
+  emitCourse(course: Course, path: string) {
+    course.los.forEach((lo) => {
+      this.emitTopic(lo as Topic, path);
+    });
+    publishTemplate(path, 'index.html', 'course.njk', course);
+    course.walls.forEach((loWall) => {
+      if (loWall.los.length > 0) {
+        publishTemplate(path, '/' + loWall.los[0].lotype + 'wall.html', 'wall.njk', loWall);
+      }
+    });
   }
 
   generateCourse(version: string, path: string, course: Course) {
-    let courseJson: any = {};
-    courseJson.version = version.toString();
-    this.emitCourse(course, '{{COURSEURL}}/', courseJson);
-    writeFile(path, 'tutors.json', JSON.stringify(courseJson));
+    if (path.charAt(0) !== '/' && path.charAt(1) !== ':') {
+      path = getCurrentDirectory() + '/' + path;
+    }
+    this.emitCourse(course, path);
   }
 }
