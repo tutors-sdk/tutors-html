@@ -13,9 +13,11 @@ nunjucks.installJinjaCompat();
 if (fs.existsSync('course.md')) {
   let site = 'public-site';
   const course = new Course();
+  console.log(`tutors-html static course generator ${version}`);
   course.publish(site);
   const emitter = new HtmlEmitter();
-  emitter.generateCourse(version, site, course);
+  emitter.generateCourse(site, course);
+  console.log(`tutors-html ${version}`);
   copyFolder(`${root}/src/assets`, site);
 } else {
   console.log('Cannot locate course.md or portfolio.yaml. Change to course folder and try again. ');

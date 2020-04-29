@@ -73,7 +73,7 @@ export class HtmlEmitter {
     });
   }
 
-  generateCourse(version: string, path: string, course: Course) {
+  generateCourse(path: string, course: Course) {
     if (path.charAt(0) !== '/' && path.charAt(1) !== ':') {
       path = getCurrentDirectory() + '/' + path;
     }
