@@ -1,4 +1,5 @@
 {% macro urlStart (lo, path) %}
+
   {% if (not lo.properties.disable) or (lo.course.options.private) %}
     {% if (lo.lotype == "course") and (lo.link) %}
       {% set url = lo.link %}
@@ -7,9 +8,14 @@
       {% elif (lo.lotype == "talk") %}
       {% set url = path + '/' + lo.folder + '/' + lo.link + ' target="_blank"' %}
     {% else %}
-      {#{% set url = path + '/ '+ lo.folder + '/' + lo.link %}#}
       {% set url = path +  lo.folder + '/' + lo.link %}
     {% endif %}
+
+    {% set regExp = r/.md.*/g %}
+    {% if regExp.test(lo.link) %}
+      {% set url = '#' %}
+    {% endif %}
+
     <a href={{ url }}>
   {% endif %}
 {% endmacro %}

@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@tutors-sdk/tutors-lib@^0.1.2":
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/@tutors-sdk/tutors-lib/-/tutors-lib-0.1.2.tgz#31ae974ac382d828c5ce70a6abe7c15b911182fc"
-  integrity sha512-xAUE7LaDarC/c1WFI1loGnzu0iXb3JGRzOwyoG4Fe47uAVnqeWi9DC/CPr4vkgJHW15DKOs61OZvWW35fekqRg==
+"@tutors-sdk/tutors-lib@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@tutors-sdk/tutors-lib/-/tutors-lib-0.2.0.tgz#1833a62a2204e33133c714ca584fb601b9423aed"
+  integrity sha512-U6UcfMvoCmCaxPt0y2pmgDx0oZfIvHQS80xknMOxyIHRtd/qUh0xBIxzCmyKtj59rtVVLZZfnMtJeUT+O+nk2Q==
   dependencies:
     "@types/js-yaml" "^3.12.3"
     "@types/lodash" "^4.14.150"
