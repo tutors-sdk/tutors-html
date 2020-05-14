@@ -1,8 +1,7 @@
-import * as sh from 'shelljs';
+ import * as sh from 'shelljs';
 
 import { Course } from '@tutors-sdk/tutors-lib/src/models/course';
 import { writeFile } from '@tutors-sdk/tutors-lib/src/utils/futils';
-import { getCurrentDirectory } from '@tutors-sdk/tutors-lib/src/utils/futils';
 import { Topic, Unit } from '@tutors-sdk/tutors-lib/src/models/topic';
 import { Lab } from '@tutors-sdk/tutors-lib/src/models/lab';
 import { MarkdownParser } from './markdown-parser';
@@ -74,9 +73,7 @@ export class HtmlEmitter {
   }
 
   generateCourse(path: string, course: Course) {
-    if (path.charAt(0) !== '/' && path.charAt(1) !== ':') {
-      path = getCurrentDirectory() + '/' + path;
-    }
+    sh.cd (path);
     this.emitCourse(course, path);
   }
 }

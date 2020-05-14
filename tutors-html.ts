@@ -13,14 +13,14 @@ nunjucks.configure(root + '/src/viewskit', { autoescape: false });
 nunjucks.installJinjaCompat();
 
 if (fs.existsSync('course.md')) {
-  let site = 'public-site';
+  let folder = process.cwd() + '/public-site'
   const course = new Course();
-  console.log(`Static course generator ${version}`);
-  course.publish(site);
+  console .log(`Static course generator ${version}`);
+  course.publish(folder);
   const emitter = new HtmlEmitter();
-  emitter.generateCourse(site, course);
+  emitter.generateCourse(folder, course);
   console.log(`${version}`);
-  copyFolder(`${root}/src/assets`, site);
+  copyFolder(`${root}/src/assets`, folder);
 } else {
   console.log('Cannot locate course.md. Change to course folder and try again. ');
 }
