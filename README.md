@@ -1,12 +1,18 @@
-tutors-js
-=====
+# tutors-html
 
-A generator for the tutors reader:
+A HTML generator for the tutors reader:
 
-- <https://github.com/edeleastar/tutors-au>
+- <https://github.com/edeleastar/tutors-design>
 
-This npm command line applcation will generate a course repository which, when deployed publiclly, will render the course interactively:
+This project will build a static web site locally. To see it in action:
 
-Example:
+```
+git clone https://github.com/tutors-sdk/tutors-starter.git
+npx tutors-html
+```
 
-- <https://tutors.design/course/wit-hdip-comp-sci-2018.github.io/ent-web/>
+This will generate a web site in ./public-site.
+
+The design of the system is discussed here:
+
+- <https://aurelia.io/blog/2019/09/03/case-study-tutors>
